@@ -107,7 +107,8 @@ export default {
 
     roomName: {
         color: ColorPalette.white,
-        fontSize: 17,
+        fontSize: 0,
+	opacity: 0,
         fontWeight: '400'
     },
 
