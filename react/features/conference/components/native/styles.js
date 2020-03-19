@@ -75,9 +75,9 @@ export default {
     navBarButton: {
         iconStyle: {
             color: ColorPalette.white,
-            fontSize: 24
+            fontSize: 0
         },
-
+	opacity: 0,
         underlayColor: 'transparent'
     },
 

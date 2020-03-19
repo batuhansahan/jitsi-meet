@@ -164,11 +164,11 @@ class Conference extends AbstractConference<Props, *> {
     render() {
         return (
             <Container style = { styles.conference }>
-                <StatusBar
+                 <StatusBar
                     barStyle = 'light-content'
                     hidden = { true }
                     translucent = { true } />
-                { this._renderContent() }
+               { this._renderContent() }
             </Container>
         );
     }
@@ -258,7 +258,7 @@ class Conference extends AbstractConference<Props, *> {
                 {/*
                   * The LargeVideo is the lowermost stacking layer.
                   */
-                    _shouldDisplayTileView
+                   _shouldDisplayTileView
                         ? <TileView onClick = { this._onClick } />
                         : <LargeVideo onClick = { this._onClick } />
                 }
