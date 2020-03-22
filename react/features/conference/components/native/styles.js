@@ -2,7 +2,7 @@ import { BoxModel, ColorPalette, fixAndroidViewClipping } from '../../../base/st
 
 import { FILMSTRIP_SIZE } from '../../../filmstrip';
 
-export const NAVBAR_GRADIENT_COLORS = [ '#000000FF', '#00000000' ];
+export const NAVBAR_GRADIENT_COLORS = [ '#00000000', '#00000000' ];
 
 // From brand guideline
 const BOTTOM_GRADIENT_HEIGHT = 290;
@@ -75,9 +75,9 @@ export default {
     navBarButton: {
         iconStyle: {
             color: ColorPalette.white,
-            fontSize: 24
+            fontSize: 0
         },
-
+	opacity: 0,
         underlayColor: 'transparent'
     },
 
@@ -113,7 +113,8 @@ export default {
 
     roomName: {
         color: ColorPalette.white,
-        fontSize: 17,
+        fontSize: 0,
+	opacity: 0,
         fontWeight: '400'
     },
 
