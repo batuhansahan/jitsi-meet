@@ -160,11 +160,6 @@ class Conference extends AbstractConference<Props, *> {
     render() {
         return (
             <Container style = { styles.conference }>
-                <StatusBar
-                    backgroundColor = {'#000'}
-                    barStyle = 'light-content'
-                    hidden = { false }
-                    translucent = { false } />
                 { this._renderContent() }
             </Container>
         );
