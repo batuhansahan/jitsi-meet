@@ -11,6 +11,8 @@ import { StyleType } from '../../../base/styles';
 import { ChatButton } from '../../../chat';
 import { InfoDialogButton } from '../../../invite';
 
+import { TileViewButton } from '../../../video-layout';
+
 import { isToolboxVisible } from '../../functions';
 
 import AudioMuteButton from '../AudioMuteButton';
@@ -20,6 +22,7 @@ import OverflowMenuButton from './OverflowMenuButton';
 import styles from './styles';
 import VideoMuteButton from '../VideoMuteButton';
 
+import ToggleCameraButton from './ToggleCameraButton';
 /**
  * The type of {@link Toolbox}'s React {@code Component} props.
  */
@@ -112,29 +115,20 @@ class Toolbox extends PureComponent<Props> {
             <View
                 pointerEvents = 'box-none'
                 style = { styles.toolbar }>
-                {
-                    _chatEnabled
-                        && <ChatButton
-                            styles = { buttonStylesBorderless }
-                            toggledStyles = {
-                                this._getChatButtonToggledStyle(toggledButtonStyles)
-                            } />
-                }
-                {
-                    !_chatEnabled
-                        && <InfoDialogButton
-                            styles = { buttonStyles }
-                            toggledStyles = { toggledButtonStyles } />
-                }
+                <TileViewButton 
+                    styles = { buttonStylesBorderless }
+                    toggledStyles = { toggledButtonStyles } />
                 <AudioMuteButton
                     styles = { buttonStyles }
                     toggledStyles = { toggledButtonStyles } />
+                <HangupButton
+                    styles = { hangupButtonStyles } />
                 <VideoMuteButton
                     styles = { buttonStyles }
                     toggledStyles = { toggledButtonStyles } />
-                <OverflowMenuButton
+                <ToggleCameraButton
                     styles = { buttonStylesBorderless }
-                    toggledStyles = { toggledButtonStyles } />
+                    toggledStyles = { toggledButtonStyles }/>
             </View>
         );
     }

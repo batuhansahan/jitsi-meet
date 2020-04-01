@@ -128,9 +128,7 @@ class OverflowMenu extends PureComponent<Props, State> {
                 onCancel = { this._onCancel }
                 onSwipe = { this._onSwipe }>
                 <AudioRouteButton { ...buttonProps } />
-                <ToggleCameraButton { ...buttonProps } />
-                <AudioOnlyButton { ...buttonProps } />
-                <TileViewButton { ...buttonProps } />
+                
             </BottomSheet>
         );
     }

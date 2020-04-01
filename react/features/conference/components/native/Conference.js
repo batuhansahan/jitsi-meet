@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { NativeModules, SafeAreaView, StatusBar } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 
 import { appNavigate } from '../../../app';
 import { PIP_ENABLED, getFeatureFlag } from '../../../base/flags';
@@ -14,9 +13,7 @@ import {
 } from '../../../base/responsive-ui';
 import { TestConnectionInfo } from '../../../base/testing';
 import { ConferenceNotification, isCalendarEnabled } from '../../../calendar-sync';
-import { Chat } from '../../../chat';
 import { DisplayNameLabel } from '../../../display-name';
-import { SharedDocument } from '../../../etherpad';
 import {
     FILMSTRIP_SIZE,
     Filmstrip,
@@ -25,7 +22,6 @@ import {
 } from '../../../filmstrip';
 import { LargeVideo } from '../../../large-video';
 import { BackButtonRegistry } from '../../../mobile/back-button';
-import { AddPeopleDialog, CalleeInfoContainer } from '../../../invite';
 import { Captions } from '../../../subtitles';
 import { isToolboxVisible, setToolboxVisible, Toolbox } from '../../../toolbox';
 
@@ -164,10 +160,6 @@ class Conference extends AbstractConference<Props, *> {
     render() {
         return (
             <Container style = { styles.conference }>
-                <StatusBar
-                    barStyle = 'light-content'
-                    hidden = { true }
-                    translucent = { true } />
                 { this._renderContent() }
             </Container>
         );
@@ -251,22 +243,12 @@ class Conference extends AbstractConference<Props, *> {
 
         return (
             <>
-                <AddPeopleDialog />
-                <Chat />
-                <SharedDocument />
-
                 {/*
                   * The LargeVideo is the lowermost stacking layer.
                   */
                     _shouldDisplayTileView
                         ? <TileView onClick = { this._onClick } />
                         : <LargeVideo onClick = { this._onClick } />
-                }
-
-                {/*
-                  * If there is a ringing call, show the callee's info.
-                  */
-                    <CalleeInfoContainer />
                 }
 
                 {/*

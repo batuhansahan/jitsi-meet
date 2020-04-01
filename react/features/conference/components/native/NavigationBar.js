@@ -41,29 +41,18 @@ class NavigationBar extends Component<Props> {
         }
 
         return [
-            <LinearGradient
-                colors = { NAVBAR_GRADIENT_COLORS }
-                key = { 1 }
-                pointerEvents = 'none'
-                style = { styles.gradient }>
-                <SafeAreaView>
-                    <View style = { styles.gradientStretchTop } />
-                </SafeAreaView>
-            </LinearGradient>,
+            <View
+            key = { 1 }
+            >
+                
+                </View>
             <View
                 key = { 2 }
                 pointerEvents = 'box-none'
                 style = { styles.navBarWrapper }>
-                <PictureInPictureButton
-                    styles = { styles.navBarButton } />
                 <View
                     pointerEvents = 'box-none'
                     style = { styles.roomNameWrapper }>
-                    <Text
-                        numberOfLines = { 1 }
-                        style = { styles.roomName }>
-                        { this.props._meetingName }
-                    </Text>
                     <ConferenceTimer />
                 </View>
             </View>

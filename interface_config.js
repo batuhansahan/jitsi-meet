@@ -65,7 +65,7 @@ var interfaceConfig = {
     /**
      * Whether to only show the filmstrip (and hide the toolbar).
      */
-    filmStripOnly: false,
+    filmStripOnly: true,
 
     /**
      * Whether to show thumbnails in filmstrip as a column instead of as a row.
