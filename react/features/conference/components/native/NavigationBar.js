@@ -41,11 +41,7 @@ class NavigationBar extends Component<Props> {
         }
 
         return [
-            <View
-            key = { 1 }
-            >
-                
-                </View>
+            <View key = { 1 } />
             <View
                 key = { 2 }
                 pointerEvents = 'box-none'
