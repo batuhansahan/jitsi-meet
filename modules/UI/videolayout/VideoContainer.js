@@ -46,7 +46,7 @@ function computeDesktopVideoSize( // eslint-disable-line max-params
 
     if (interfaceConfig.VERTICAL_FILMSTRIP) {
         // eslint-disable-next-line no-param-reassign
-        videoSpaceWidth -= Filmstrip.getFilmstripWidth();
+        videoSpaceWidth -= Filmstrip.getVerticalFilmstripWidth();
     } else {
         // eslint-disable-next-line no-param-reassign
         videoSpaceHeight -= Filmstrip.getFilmstripHeight();
@@ -206,6 +206,8 @@ export class VideoContainer extends LargeContainer {
          */
         this._hideBackground = true;
 
+        this._isHidden = false;
+
         /**
          * Flag indicates whether or not the avatar is currently displayed.
          * @type {boolean}
@@ -332,7 +334,7 @@ export class VideoContainer extends LargeContainer {
         /* eslint-enable max-params */
         if (this.stream && this.isScreenSharing()) {
             if (interfaceConfig.VERTICAL_FILMSTRIP) {
-                containerWidthToUse -= Filmstrip.getFilmstripWidth();
+                containerWidthToUse -= Filmstrip.getVerticalFilmstripWidth();
             }
 
             return getCameraVideoPosition(width,
@@ -561,6 +563,8 @@ export class VideoContainer extends LargeContainer {
                 FADE_DURATION_MS,
                 1,
                 () => {
+                    this._isHidden = false;
+                    this._updateBackground();
                     resolve();
                 }
             );
@@ -578,6 +582,8 @@ export class VideoContainer extends LargeContainer {
         return new Promise(resolve => {
             this.$wrapperParent.fadeTo(FADE_DURATION_MS, 0, () => {
                 this.$wrapperParent.css('visibility', 'hidden');
+                this._isHidden = true;
+                this._updateBackground();
                 resolve();
             });
         });
@@ -635,7 +641,7 @@ export class VideoContainer extends LargeContainer {
 
         ReactDOM.render(
             <LargeVideoBackground
-                hidden = { this._hideBackground }
+                hidden = { this._hideBackground || this._isHidden }
                 mirror = {
                     this.stream
                     && this.stream.isLocal()

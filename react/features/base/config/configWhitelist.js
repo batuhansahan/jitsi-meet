@@ -1,3 +1,5 @@
+import extraConfigWhitelist from './extraConfigWhitelist';
+
 /**
  * The config keys to whitelist, the keys that can be overridden.
  * Currently we can only whitelist the first part of the properties, like
@@ -12,6 +14,7 @@ export default [
     '_peerConnStatusRtcMuteTimeout',
     'abTesting',
     'analytics.disabled',
+    'audioLevelsInterval',
     'autoRecord',
     'autoRecordToken',
     'avgRtpStatsN',
@@ -84,12 +87,16 @@ export default [
     'disableDeepLinking',
     'disableH264',
     'disableHPF',
+    'disableInviteFunctions',
     'disableLocalVideoFlip',
     'disableNS',
     'disableRemoteControl',
+    'disableRemoteMute',
     'disableRtx',
     'disableSuspendVideo',
+    'disableThirdPartyRequests',
     'displayJids',
+    'doNotStoreRoom',
     'e2eping',
     'enableDisplayNameInStats',
     'enableEmailInStats',
@@ -103,6 +110,7 @@ export default [
     'enableTcc',
     'etherpad_base',
     'failICE',
+    'feedbackPercentage',
     'fileRecordingsEnabled',
     'firefox_fake_device',
     'forceJVB121Ratio',
@@ -120,8 +128,10 @@ export default [
     'nick',
     'openBridgeChannel',
     'p2p',
+    'pcStatsInterval',
     'preferH264',
     'requireDisplayName',
+    'remoteVideoMenu',
     'resolution',
     'startAudioMuted',
     'startAudioOnly',
@@ -139,4 +149,4 @@ export default [
     'useStunTurn',
     'webrtcIceTcpDisable',
     'webrtcIceUdpDisable'
-];
+].concat(extraConfigWhitelist);

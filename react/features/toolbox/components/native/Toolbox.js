@@ -9,10 +9,8 @@ import { Container } from '../../../base/react';
 import { connect } from '../../../base/redux';
 import { StyleType } from '../../../base/styles';
 import { ChatButton } from '../../../chat';
-import { InfoDialogButton } from '../../../invite';
-
+import { InviteButton } from '../../../invite';
 import { TileViewButton } from '../../../video-layout';
-
 import { isToolboxVisible } from '../../functions';
 
 import AudioMuteButton from '../AudioMuteButton';
@@ -21,8 +19,8 @@ import HangupButton from '../HangupButton';
 import OverflowMenuButton from './OverflowMenuButton';
 import styles from './styles';
 import VideoMuteButton from '../VideoMuteButton';
-
 import ToggleCameraButton from './ToggleCameraButton';
+
 /**
  * The type of {@link Toolbox}'s React {@code Component} props.
  */
@@ -108,7 +106,7 @@ class Toolbox extends PureComponent<Props> {
      * @returns {React$Node}
      */
     _renderToolbar() {
-        const { _chatEnabled, _styles } = this.props;
+        const { _styles } = this.props;
         const { buttonStyles, buttonStylesBorderless, hangupButtonStyles, toggledButtonStyles } = _styles;
 
         return (
@@ -128,7 +126,7 @@ class Toolbox extends PureComponent<Props> {
                     toggledStyles = { toggledButtonStyles } />
                 <ToggleCameraButton
                     styles = { buttonStylesBorderless }
-                    toggledStyles = { toggledButtonStyles }/>
+                    toggledStyles = { toggledButtonStyles } />
             </View>
         );
     }

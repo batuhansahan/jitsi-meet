@@ -13,7 +13,9 @@ import {
 } from '../../../base/responsive-ui';
 import { TestConnectionInfo } from '../../../base/testing';
 import { ConferenceNotification, isCalendarEnabled } from '../../../calendar-sync';
+import { Chat } from '../../../chat';
 import { DisplayNameLabel } from '../../../display-name';
+import { SharedDocument } from '../../../etherpad';
 import {
     FILMSTRIP_SIZE,
     Filmstrip,
@@ -30,6 +32,7 @@ import {
     abstractMapStateToProps
 } from '../AbstractConference';
 import Labels from './Labels';
+import LonelyMeetingExperience from './LonelyMeetingExperience';
 import NavigationBar from './NavigationBar';
 import styles, { NAVBAR_GRADIENT_COLORS } from './styles';
 
@@ -160,6 +163,10 @@ class Conference extends AbstractConference<Props, *> {
     render() {
         return (
             <Container style = { styles.conference }>
+                <StatusBar
+                    barStyle = 'light-content'
+                    hidden = { true }
+                    translucent = { true } />
                 { this._renderContent() }
             </Container>
         );
@@ -205,6 +212,16 @@ class Conference extends AbstractConference<Props, *> {
     }
 
     /**
+     * Renders JitsiModals that are supposed to be on the conference screen.
+     *
+     * @returns {Array<ReactElement>}
+     */
+    _renderConferenceModals() {
+        return [<></>
+        ];
+    }
+
+    /**
      * Renders the conference notification badge if the feature is enabled.
      *
      * @private
@@ -215,7 +232,7 @@ class Conference extends AbstractConference<Props, *> {
 
         return (
             _calendarEnabled && !_reducedUI
-                ? <ConferenceNotification />
+                ? undefined
                 : undefined);
     }
 
@@ -250,6 +267,7 @@ class Conference extends AbstractConference<Props, *> {
                         ? <TileView onClick = { this._onClick } />
                         : <LargeVideo onClick = { this._onClick } />
                 }
+
 
                 {/*
                   * The activity/loading indicator goes above everything, except
@@ -292,12 +310,9 @@ class Conference extends AbstractConference<Props, *> {
                     pointerEvents = 'box-none'
                     style = { styles.navBarSafeView }>
                     <NavigationBar />
-                    { this._renderNotificationsContainer() }
                 </SafeAreaView>
 
                 <TestConnectionInfo />
-
-                { this._renderConferenceNotification() }
             </>
         );
     }

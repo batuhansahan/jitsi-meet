@@ -1,5 +1,5 @@
 import { BoxModel, ColorPalette, fixAndroidViewClipping } from '../../../base/styles';
-
+import { ColorSchemeRegistry, schemeColor } from '../../../base/color-scheme';
 import { FILMSTRIP_SIZE } from '../../../filmstrip';
 
 export const NAVBAR_GRADIENT_COLORS = [ '#00000000', '#00000000' ];
@@ -72,12 +72,35 @@ export default {
         top: 0
     },
 
+    lonelyButton: {
+        alignItems: 'center',
+        borderRadius: 24,
+        flexDirection: 'row',
+        height: 48,
+        justifyContent: 'space-around',
+        paddingHorizontal: 12
+    },
+
+    lonelyButtonComponents: {
+        marginHorizontal: 6
+    },
+
+    lonelyMeetingContainer: {
+        alignSelf: 'stretch',
+        alignItems: 'center',
+        padding: BoxModel.padding * 2
+    },
+
+    lonelyMessage: {
+        paddingVertical: 12
+    },
+
     navBarButton: {
         iconStyle: {
             color: ColorPalette.white,
             fontSize: 0
         },
-	opacity: 0,
+        opacity:0,
         underlayColor: 'transparent'
     },
 
@@ -114,7 +137,7 @@ export default {
     roomName: {
         color: ColorPalette.white,
         fontSize: 0,
-	opacity: 0,
+        opacity:0,
         fontWeight: '400'
     },
 
@@ -147,3 +170,13 @@ export default {
         top: BoxModel.margin * 3
     }
 };
+
+ColorSchemeRegistry.register('Conference', {
+    lonelyButton: {
+        backgroundColor: schemeColor('inviteButtonBackground')
+    },
+
+    lonelyMessage: {
+        color: schemeColor('onVideoText')
+    }
+});

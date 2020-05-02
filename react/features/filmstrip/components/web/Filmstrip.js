@@ -10,6 +10,7 @@ import {
     sendAnalytics
 } from '../../../analytics';
 import { Icon, IconMenuDown, IconMenuUp } from '../../../base/icons';
+import { translate } from '../../../base/i18n';
 import { connect } from '../../../base/redux';
 import { dockToolbox } from '../../../toolbox';
 
@@ -54,6 +55,16 @@ type Props = {
     _filmstripWidth: number,
 
     /**
+     * Whether the filmstrip scrollbar should be hidden or not.
+     */
+    _hideScrollbar: boolean,
+
+    /**
+     * Whether the filmstrip toolbar should be hidden or not.
+     */
+    _hideToolbar: boolean,
+
+    /**
      * Whether or not remote videos are currently being hovered over. Hover
      * handling is currently being handled detected outside of react.
      */
@@ -77,7 +88,12 @@ type Props = {
     /**
      * The redux {@code dispatch} function.
      */
-    dispatch: Dispatch<any>
+    dispatch: Dispatch<any>,
+
+    /**
+     * Invoked to obtain translated strings.
+     */
+    t: Function
 };
 
 /**
@@ -161,14 +177,15 @@ class Filmstrip extends Component <Props> {
         // will get updated without replacing the DOM. If the known DOM gets
         // modified, then the views will get blown away.
 
-        const remoteVideosStyle = { };
+        const filmstripStyle = { };
         const filmstripRemoteVideosContainerStyle = {};
         let remoteVideoContainerClassName = 'remote-videos-container';
 
         switch (this.props._currentLayout) {
         case LAYOUTS.VERTICAL_FILMSTRIP_VIEW:
-            // Adding 8px for the 2px margins and 2px borders on the left and right. Also adding 7px for the scrollbar.
-            remoteVideosStyle.maxWidth = (interfaceConfig.FILM_STRIP_MAX_HEIGHT || 120) + 15;
+            // Adding 18px for the 2px margins, 2px borders on the left and right and 5px padding on the left and right.
+            // Also adding 7px for the scrollbar.
+            filmstripStyle.maxWidth = (interfaceConfig.FILM_STRIP_MAX_HEIGHT || 120) + 25;
             break;
         case LAYOUTS.TILE_VIEW: {
             // The size of the side margins for each tile as set in CSS.
@@ -183,14 +200,26 @@ class Filmstrip extends Component <Props> {
         }
         }
 
+        let remoteVideosWrapperClassName = 'filmstrip__videos';
+
+        if (this.props._hideScrollbar) {
+            remoteVideosWrapperClassName += ' hide-scrollbar';
+        }
+
+        let toolbar = null;
+
+        if (!this.props._hideToolbar) {
+            toolbar = this.props._filmstripOnly ? <Toolbar /> : this._renderToggleButton();
+        }
+
         return (
-            <div className = { `filmstrip ${this.props._className}` }>
-                { this.props._filmstripOnly
-                    ? <Toolbar /> : this._renderToggleButton() }
+            <div
+                className = { `filmstrip ${this.props._className}` }
+                style = { filmstripStyle }>
+                { toolbar }
                 <div
                     className = { this.props._videosClassName }
-                    id = 'remoteVideos'
-                    style = { remoteVideosStyle }>
+                    id = 'remoteVideos'>
                     <div
                         className = 'filmstrip__videos'
                         id = 'filmstripLocalVideo'
@@ -199,7 +228,7 @@ class Filmstrip extends Component <Props> {
                         <div id = 'filmstripLocalVideoThumbnail' />
                     </div>
                     <div
-                        className = 'filmstrip__videos'
+                        className = { remoteVideosWrapperClassName }
                         id = 'filmstripRemoteVideos'>
                         {/*
                           * XXX This extra video container is needed for
@@ -315,10 +344,12 @@ class Filmstrip extends Component <Props> {
      */
     _renderToggleButton() {
         const icon = this.props._visible ? IconMenuDown : IconMenuUp;
+        const { t } = this.props;
 
         return (
             <div className = 'filmstrip__toolbar'>
                 <button
+                    aria-label = { t('toolbar.accessibilityLabel.toggleFilmstrip') }
                     id = 'toggleFilmstripButton'
                     onClick = { this._onToolbarToggleFilmstrip }>
                     <Icon src = { icon } />
@@ -333,15 +364,10 @@ class Filmstrip extends Component <Props> {
  *
  * @param {Object} state - The Redux state.
  * @private
- * @returns {{
- *     _className: string,
- *     _filmstripOnly: boolean,
- *     _hovered: boolean,
- *     _videosClassName: string,
- *     _visible: boolean
- * }}
+ * @returns {Props}
  */
 function _mapStateToProps(state) {
+    const { iAmSipGateway } = state['features/base/config'];
     const { hovered, visible } = state['features/filmstrip'];
     const isFilmstripOnly = Boolean(interfaceConfig.filmStripOnly);
     const reduceHeight
@@ -360,6 +386,8 @@ function _mapStateToProps(state) {
         _currentLayout: getCurrentLayout(state),
         _filmstripOnly: isFilmstripOnly,
         _filmstripWidth: filmstripWidth,
+        _hideScrollbar: Boolean(iAmSipGateway),
+        _hideToolbar: Boolean(iAmSipGateway),
         _hovered: hovered,
         _rows: gridDimensions.rows,
         _videosClassName: videosClassName,
@@ -367,4 +395,4 @@ function _mapStateToProps(state) {
     };
 }
 
-export default connect(_mapStateToProps)(Filmstrip);
+export default translate(connect(_mapStateToProps)(Filmstrip));
