@@ -1,6 +1,7 @@
 // @flow
 
 import JitsiMeetJS from '../lib-jitsi-meet';
+
 import { isMobileBrowser } from './utils';
 
 const { browser } = JitsiMeetJS.util;
@@ -9,7 +10,8 @@ const DEFAULT_OPTIMAL_BROWSERS = [
     'chrome',
     'electron',
     'firefox',
-    'nwjs'
+    'nwjs',
+    'safari'
 ];
 
 const DEFAULT_UNSUPPORTED_BROWSERS = [];

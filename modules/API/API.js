@@ -1,5 +1,7 @@
 // @flow
 
+import Logger from 'jitsi-meet-logger';
+
 import * as JitsiMeetConferenceEvents from '../../ConferenceEvents';
 import {
     createApiEvent,
@@ -11,16 +13,19 @@ import {
     setSubject
 } from '../../react/features/base/conference';
 import { parseJWTFromURLParams } from '../../react/features/base/jwt';
-import { invite } from '../../react/features/invite';
-import { toggleTileView } from '../../react/features/video-layout';
-import { getJitsiMeetTransport } from '../transport';
-
-import { API_ID } from './constants';
 import {
     processExternalDeviceRequest
 } from '../../react/features/device-selection/functions';
+import { setE2EEKey } from '../../react/features/e2ee';
+import { invite } from '../../react/features/invite';
+import { muteAllParticipants } from '../../react/features/remote-video-menu/actions';
+import { toggleTileView } from '../../react/features/video-layout';
+import { setVideoQuality } from '../../react/features/video-quality';
+import { getJitsiMeetTransport } from '../transport';
 
-const logger = require('jitsi-meet-logger').getLogger(__filename);
+import { API_ID, ENDPOINT_TEXT_MESSAGE_NAME } from './constants';
+
+const logger = Logger.getLogger(__filename);
 
 declare var APP: Object;
 
@@ -68,6 +73,16 @@ function initCommands() {
         'display-name': displayName => {
             sendAnalytics(createApiEvent('display.name.changed'));
             APP.conference.changeLocalDisplayName(displayName);
+        },
+        'mute-everyone': () => {
+            sendAnalytics(createApiEvent('muted-everyone'));
+            const participants = APP.store.getState()['features/base/participants'];
+            const localIds = participants
+                .filter(participant => participant.local)
+                .filter(participant => participant.role === 'moderator')
+                .map(participant => participant.id);
+
+            APP.store.dispatch(muteAllParticipants(localIds));
         },
         'password': password => {
             const { conference, passwordRequired }
@@ -155,6 +170,26 @@ function initCommands() {
         'avatar-url': avatarUrl => {
             sendAnalytics(createApiEvent('avatar.url.changed'));
             APP.conference.changeLocalAvatarUrl(avatarUrl);
+        },
+        'send-endpoint-text-message': (to, text) => {
+            logger.debug('Send endpoint message command received');
+            try {
+                APP.conference.sendEndpointMessage(to, {
+                    name: ENDPOINT_TEXT_MESSAGE_NAME,
+                    text
+                });
+            } catch (err) {
+                logger.error('Failed sending endpoint text message', err);
+            }
+        },
+        'e2ee-key': key => {
+            logger.debug('Set E2EE key command received');
+            APP.store.dispatch(setE2EEKey(key));
+        },
+        'set-video-quality': frameHeight => {
+            logger.debug('Set video quality command received');
+            sendAnalytics(createApiEvent('set.video.quality'));
+            APP.store.dispatch(setVideoQuality(frameHeight));
         }
     };
     transport.on('event', ({ data, name }) => {
@@ -358,12 +393,14 @@ class API {
      * Notify external application (if API is enabled) that message was sent.
      *
      * @param {string} message - Message body.
+     * @param {boolean} privateMessage - True if the message was a private message.
      * @returns {void}
      */
-    notifySendingChatMessage(message: string) {
+    notifySendingChatMessage(message: string, privateMessage: boolean) {
         this._sendEvent({
             name: 'outgoing-message',
-            message
+            message,
+            privateMessage
         });
     }
 
@@ -422,6 +459,22 @@ class API {
     }
 
     /**
+     * Notify external application (if API is enabled) that the user role
+     * has changed.
+     *
+     * @param {string} id - User id.
+     * @param {string} role - The new user role.
+     * @returns {void}
+     */
+    notifyUserRoleChanged(id: string, role: string) {
+        this._sendEvent({
+            name: 'participant-role-changed',
+            id,
+            role
+        });
+    }
+
+    /**
      * Notify external application (if API is enabled) that user changed their
      * avatar.
      *
@@ -434,6 +487,20 @@ class API {
             name: 'avatar-changed',
             avatarURL,
             id
+        });
+    }
+
+    /**
+     * Notify external application (if API is enabled) that user received
+     * a text message through datachannels.
+     *
+     * @param {Object} data - The event data.
+     * @returns {void}
+     */
+    notifyEndpointTextMessageReceived(data: Object) {
+        this._sendEvent({
+            name: 'endpoint-text-message-received',
+            data
         });
     }
 

@@ -4,7 +4,7 @@ import _ from 'lodash';
 import React from 'react';
 
 import VideoLayout from '../../../../../modules/UI/videolayout/VideoLayout';
-
+import { getConferenceNameForTitle } from '../../../base/conference';
 import { connect, disconnect } from '../../../base/connection';
 import { translate } from '../../../base/i18n';
 import { connect as reactReduxConnect } from '../../../base/redux';
@@ -12,25 +12,25 @@ import { Chat } from '../../../chat';
 import { Filmstrip } from '../../../filmstrip';
 import { CalleeInfoContainer } from '../../../invite';
 import { LargeVideo } from '../../../large-video';
-import { LAYOUTS, getCurrentLayout } from '../../../video-layout';
-
+import { Prejoin, isPrejoinPageVisible } from '../../../prejoin';
 import {
     Toolbox,
     fullScreenChanged,
     setToolboxAlwaysVisible,
     showToolbox
 } from '../../../toolbox';
-
+import { LAYOUTS, getCurrentLayout } from '../../../video-layout';
 import { maybeShowSuboptimalExperienceNotification } from '../../functions';
-
-import Labels from './Labels';
-import { default as Notice } from './Notice';
-import { default as Subject } from './Subject';
 import {
     AbstractConference,
     abstractMapStateToProps
 } from '../AbstractConference';
 import type { AbstractProps } from '../AbstractConference';
+
+import InviteMore from './InviteMore';
+import Labels from './Labels';
+import { default as Notice } from './Notice';
+import { default as Subject } from './Subject';
 
 declare var APP: Object;
 declare var config: Object;
@@ -78,6 +78,16 @@ type Props = AbstractProps & {
      */
     _layoutClassName: string,
 
+    /**
+     * Name for this conference room.
+     */
+    _roomName: string,
+
+    /**
+     * If prejoin page is visible or not.
+     */
+    _showPrejoin: boolean,
+
     dispatch: Function,
     t: Function
 }
@@ -120,7 +130,7 @@ class Conference extends AbstractConference<Props, *> {
      * @inheritdoc
      */
     componentDidMount() {
-        document.title = interfaceConfig.APP_NAME;
+        document.title = `${this.props._roomName} | ${interfaceConfig.APP_NAME}`;
         this._start();
     }
 
@@ -172,18 +182,25 @@ class Conference extends AbstractConference<Props, *> {
             // interfaceConfig is obsolete but legacy support is required.
             filmStripOnly: filmstripOnly
         } = interfaceConfig;
+        const {
+            _iAmRecorder,
+            _layoutClassName,
+            _showPrejoin
+        } = this.props;
         const hideVideoQualityLabel
             = filmstripOnly
                 || VIDEO_QUALITY_LABEL_DISABLED
-                || this.props._iAmRecorder;
+                || _iAmRecorder;
 
         return (
             <div
-                className = { this.props._layoutClassName }
+                className = { _layoutClassName }
                 id = 'videoconference_page'
                 onMouseMove = { this._onShowToolbar }>
+
                 <Notice />
                 <Subject />
+                <InviteMore />
                 <div id = 'videospace'>
                     <LargeVideo />
                     { hideVideoQualityLabel
@@ -191,10 +208,12 @@ class Conference extends AbstractConference<Props, *> {
                     <Filmstrip filmstripOnly = { filmstripOnly } />
                 </div>
 
-                { filmstripOnly || <Toolbox /> }
+                { filmstripOnly || _showPrejoin || <Toolbox /> }
                 { filmstripOnly || <Chat /> }
 
                 { this.renderNotificationsContainer() }
+
+                { !filmstripOnly && _showPrejoin && <Prejoin />}
 
                 <CalleeInfoContainer />
             </div>
@@ -258,12 +277,12 @@ class Conference extends AbstractConference<Props, *> {
  * @returns {Props}
  */
 function _mapStateToProps(state) {
-    const currentLayout = getCurrentLayout(state);
-
     return {
         ...abstractMapStateToProps(state),
         _iAmRecorder: state['features/base/config'].iAmRecorder,
-        _layoutClassName: LAYOUT_CLASSNAMES[currentLayout]
+        _layoutClassName: LAYOUT_CLASSNAMES[getCurrentLayout(state)],
+        _roomName: getConferenceNameForTitle(state),
+        _showPrejoin: isPrejoinPageVisible(state)
     };
 }
 

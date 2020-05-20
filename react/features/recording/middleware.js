@@ -20,6 +20,7 @@ import {
     unregisterSound
 } from '../base/sounds';
 
+import { RECORDING_SESSION_UPDATED } from './actionTypes';
 import {
     clearRecordingSessions,
     hidePendingRecordingNotification,
@@ -29,7 +30,6 @@ import {
     showStoppedRecordingNotification,
     updateRecordingSessionData
 } from './actions';
-import { RECORDING_SESSION_UPDATED } from './actionTypes';
 import {
     LIVE_STREAMING_OFF_SOUND_ID,
     LIVE_STREAMING_ON_SOUND_ID,
@@ -130,7 +130,8 @@ MiddlewareRegistry.register(({ dispatch, getState }) => next => action => {
         // but we want to indicate those in case of sip gateway
         const {
             iAmRecorder,
-            iAmSipGateway
+            iAmSipGateway,
+            disableRecordAudioNotification
         } = getState()['features/base/config'];
 
         if (iAmRecorder && !iAmSipGateway) {
@@ -153,6 +154,11 @@ MiddlewareRegistry.register(({ dispatch, getState }) => next => action => {
                 const initiatorName = initiator && getParticipantDisplayName(getState, initiator.getId());
 
                 initiatorName && dispatch(showStartedRecordingNotification(mode, initiatorName));
+                sendAnalytics(createRecordingEvent('start', mode));
+
+                if (disableRecordAudioNotification) {
+                    break;
+                }
 
                 let soundID;
 
@@ -163,7 +169,6 @@ MiddlewareRegistry.register(({ dispatch, getState }) => next => action => {
                 }
 
                 if (soundID) {
-                    sendAnalytics(createRecordingEvent('start', mode));
                     dispatch(playSound(soundID));
                 }
             } else if (updatedSessionData.status === OFF
@@ -176,6 +181,11 @@ MiddlewareRegistry.register(({ dispatch, getState }) => next => action => {
                     duration
                         = (Date.now() / 1000) - oldSessionData.timestamp;
                 }
+                sendAnalytics(createRecordingEvent('stop', mode, duration));
+
+                if (disableRecordAudioNotification) {
+                    break;
+                }
 
                 if (mode === JitsiRecordingConstants.mode.FILE) {
                     soundOff = RECORDING_OFF_SOUND_ID;
@@ -186,7 +196,6 @@ MiddlewareRegistry.register(({ dispatch, getState }) => next => action => {
                 }
 
                 if (soundOff && soundOn) {
-                    sendAnalytics(createRecordingEvent('stop', mode, duration));
                     dispatch(stopSound(soundOn));
                     dispatch(playSound(soundOff));
                 }

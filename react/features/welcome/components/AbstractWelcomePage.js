@@ -6,8 +6,9 @@ import type { Dispatch } from 'redux';
 
 import { createWelcomePageEvent, sendAnalytics } from '../../analytics';
 import { appNavigate } from '../../app';
+import isInsecureRoomName from '../../base/util/isInsecureRoomName';
 import { isCalendarEnabled } from '../../calendar-sync';
-import { isRoomValid } from '../../base/conference';
+import { isRecentListEnabled } from '../../recent-list/functions';
 
 /**
  * {@code AbstractWelcomePage}'s React {@code Component} prop types.
@@ -18,6 +19,11 @@ type Props = {
      * Whether the calendar functionality is enabled or not.
      */
     _calendarEnabled: boolean,
+
+    /**
+     * Whether the recent list is enabled
+     */
+    _recentListEnabled: Boolean,
 
     /**
      * Room name to join to.
@@ -70,6 +76,7 @@ export class AbstractWelcomePage extends Component<Props, *> {
     state = {
         animateTimeoutId: undefined,
         generatedRoomname: '',
+        insecureRoomName: false,
         joining: false,
         room: '',
         roomPlaceholder: '',
@@ -90,6 +97,7 @@ export class AbstractWelcomePage extends Component<Props, *> {
             = this._animateRoomnameChanging.bind(this);
         this._onJoin = this._onJoin.bind(this);
         this._onRoomChange = this._onRoomChange.bind(this);
+        this._renderInsecureRoomNameWarning = this._renderInsecureRoomNameWarning.bind(this);
         this._updateRoomname = this._updateRoomname.bind(this);
     }
 
@@ -156,16 +164,11 @@ export class AbstractWelcomePage extends Component<Props, *> {
     }
 
     /**
-     * Determines whether the 'Join' button is (to be) disabled i.e. There's no
-     * valid room name typed into the respective text input field.
+     * Renders the insecure room name warning.
      *
-     * @protected
-     * @returns {boolean} If the 'Join' button is (to be) disabled, true;
-     * otherwise, false.
+     * @returns {ReactElement}
      */
-    _isJoinDisabled() {
-        return this.state.joining || !isRoomValid(this.state.room);
-    }
+    _doRenderInsecureRoomNameWarning: () => React$Component<any>;
 
     _onJoin: () => void;
 
@@ -209,7 +212,25 @@ export class AbstractWelcomePage extends Component<Props, *> {
      * @returns {void}
      */
     _onRoomChange(value: string) {
-        this.setState({ room: value });
+        this.setState({
+            room: value,
+            insecureRoomName: value && isInsecureRoomName(value)
+        });
+    }
+
+    _renderInsecureRoomNameWarning: () => React$Component<any>;;
+
+    /**
+     * Renders the insecure room name warning if needed.
+     *
+     * @returns {ReactElement}
+     */
+    _renderInsecureRoomNameWarning() {
+        if (this.state.insecureRoomName) {
+            return this._doRenderInsecureRoomNameWarning();
+        }
+
+        return null;
     }
 
     _updateRoomname: () => void;
@@ -252,6 +273,7 @@ export class AbstractWelcomePage extends Component<Props, *> {
 export function _mapStateToProps(state: Object) {
     return {
         _calendarEnabled: isCalendarEnabled(state),
+        _recentListEnabled: isRecentListEnabled(),
         _room: state['features/base/conference'].room,
         _settings: state['features/base/settings']
     };
