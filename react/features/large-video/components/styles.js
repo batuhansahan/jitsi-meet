@@ -21,5 +21,12 @@ ColorSchemeRegistry.register('LargeVideo', {
         backgroundColor: schemeColor('background'),
         flex: 1,
         justifyContent: 'center'
+    },
+    largeVideoAudio: {
+        ...StyleSheet.absoluteFillObject,
+        alignItems: 'stretch',
+        backgroundColor: 'white',
+        flex: 1,
+        justifyContent: 'center'
     }
 });

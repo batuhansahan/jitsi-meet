@@ -122,7 +122,8 @@ class LargeVideo extends Component<Props, State> {
         const {
             _participantId,
             _styles,
-            onClick
+            onClick,
+            whiteback = false
         } = this.props;
 
         return (
@@ -132,7 +133,7 @@ class LargeVideo extends Component<Props, State> {
                     avatarSize = { avatarSize }
                     onPress = { onClick }
                     participantId = { _participantId }
-                    style = { _styles.largeVideo }
+                    style = { whiteback ? _styles.largeVideoAudio : _styles.largeVideo }
                     testHintId = 'org.jitsi.meet.LargeVideo'
                     useConnectivityInfoLabel = { useConnectivityInfoLabel }
                     zOrder = { 0 }

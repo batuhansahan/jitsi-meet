@@ -5,7 +5,7 @@ import { NativeModules, SafeAreaView, StatusBar } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
 import { appNavigate } from '../../../app';
-import { PIP_ENABLED, getFeatureFlag } from '../../../base/flags';
+import { PIP_ENABLED, getFeatureFlag,TOOLBOX_ENABLED } from '../../../base/flags';
 import { Container, LoadingIndicator, TintedView } from '../../../base/react';
 import { connect } from '../../../base/redux';
 import {
@@ -14,7 +14,6 @@ import {
 } from '../../../base/responsive-ui';
 import { TestConnectionInfo } from '../../../base/testing';
 import { ConferenceNotification, isCalendarEnabled } from '../../../calendar-sync';
-import { Chat } from '../../../chat';
 import { DisplayNameLabel } from '../../../display-name';
 import { SharedDocument } from '../../../etherpad';
 import {
@@ -26,7 +25,6 @@ import {
 import { AddPeopleDialog, CalleeInfoContainer } from '../../../invite';
 import { LargeVideo } from '../../../large-video';
 import { BackButtonRegistry } from '../../../mobile/back-button';
-import { Captions } from '../../../subtitles';
 import { isToolboxVisible, setToolboxVisible, Toolbox } from '../../../toolbox';
 import {
     AbstractConference,
@@ -80,6 +78,14 @@ type Props = AbstractProps & {
      * @private
      */
     _pictureInPictureEnabled: boolean,
+
+
+    /**
+     * 
+     */
+
+    _toolboxEnabled: boolean,
+
 
     /**
      * The indicator which determines whether the UI is reduced (to accommodate
@@ -220,26 +226,9 @@ class Conference extends AbstractConference<Props, *> {
      */
     _renderConferenceModals() {
         return [
-            <AddPeopleDialog key = 'addPeopleDialog' />,
-            <Chat key = 'chat' />,
-            <SharedDocument key = 'sharedDocument' />
         ];
     }
 
-    /**
-     * Renders the conference notification badge if the feature is enabled.
-     *
-     * @private
-     * @returns {React$Node}
-     */
-    _renderConferenceNotification() {
-        const { _calendarEnabled, _reducedUI } = this.props;
-
-        return (
-            _calendarEnabled && !_reducedUI
-                ? <ConferenceNotification />
-                : undefined);
-    }
 
     /**
      * Renders the content for the Conference container.
@@ -254,7 +243,8 @@ class Conference extends AbstractConference<Props, *> {
             _largeVideoParticipantId,
             _reducedUI,
             _shouldDisplayTileView,
-            _toolboxVisible
+            _toolboxVisible,
+            _toolboxEnabled
         } = this.props;
         const showGradient = _toolboxVisible;
         const applyGradientStretching = _filmstripVisible && isNarrowAspectRatio(this) && !_shouldDisplayTileView;
@@ -267,23 +257,17 @@ class Conference extends AbstractConference<Props, *> {
             <>
                 {/*
                   * The LargeVideo is the lowermost stacking layer.
-                  */
-                    _shouldDisplayTileView
-                        ? <TileView onClick = { this._onClick } />
-                        : <LargeVideo onClick = { this._onClick } />
+                  */_toolboxEnabled ? _shouldDisplayTileView
+                            ? <TileView onClick = { this._onClick } />
+                            : <LargeVideo whiteback={false} onClick = { this._onClick } /> :
+                  <LargeVideo whiteback={true} onClick = { this._onClick } /> 
+                        
                 }
-
-                {/*
-                  * If there is a ringing call, show the callee's info.
-                  */
-                    <CalleeInfoContainer />
-                }
-
                 {/*
                   * The activity/loading indicator goes above everything, except
                   * the toolbox/toolbars and the dialogs.
                   */
-                    _connecting
+                    _toolboxEnabled && _connecting
                         && <TintedView>
                             <LoadingIndicator />
                         </TintedView>
@@ -293,34 +277,12 @@ class Conference extends AbstractConference<Props, *> {
                     pointerEvents = 'box-none'
                     style = { styles.toolboxAndFilmstripContainer }>
 
-                    { showGradient && <LinearGradient
-                        colors = { NAVBAR_GRADIENT_COLORS }
-                        end = {{
-                            x: 0.0,
-                            y: 0.0
-                        }}
-                        pointerEvents = 'none'
-                        start = {{
-                            x: 0.0,
-                            y: 1.0
-                        }}
-                        style = { [
-                            styles.bottomGradient,
-                            applyGradientStretching ? styles.gradientStretchBottom : undefined
-                        ] } />}
-
-                    <Labels />
-
-                    <Captions onPress = { this._onClick } />
-
-                    { _shouldDisplayTileView || <DisplayNameLabel participantId = { _largeVideoParticipantId } /> }
-
-                    <LonelyMeetingExperience />
+                    { _shouldDisplayTileView || _toolboxEnabled && <DisplayNameLabel participantId = { _largeVideoParticipantId } /> }
 
                     {/*
                       * The Toolbox is in a stacking layer below the Filmstrip.
                       */}
-                    <Toolbox />
+                    {_toolboxEnabled && <Toolbox />}
 
                     {/*
                       * The Filmstrip is in a stacking layer above the
@@ -330,22 +292,9 @@ class Conference extends AbstractConference<Props, *> {
                       * React Components depict the videos of the conference's
                       * participants.
                       */
-                        _shouldDisplayTileView ? undefined : <Filmstrip />
+                        _shouldDisplayTileView ? undefined : _toolboxEnabled && <Filmstrip />
                     }
                 </SafeAreaView>
-
-                <SafeAreaView
-                    pointerEvents = 'box-none'
-                    style = { styles.navBarSafeView }>
-                    <NavigationBar />
-                    { this._renderNotificationsContainer() }
-                </SafeAreaView>
-
-                <TestConnectionInfo />
-
-                { this._renderConferenceNotification() }
-
-                { this._renderConferenceModals() }
             </>
         );
     }
@@ -370,37 +319,6 @@ class Conference extends AbstractConference<Props, *> {
                         </TintedView>
                 }
             </>
-        );
-    }
-
-    /**
-     * Renders a container for notifications to be displayed by the
-     * base/notifications feature.
-     *
-     * @private
-     * @returns {React$Element}
-     */
-    _renderNotificationsContainer() {
-        const notificationsStyle = {};
-
-        // In the landscape mode (wide) there's problem with notifications being
-        // shadowed by the filmstrip rendered on the right. This makes the "x"
-        // button not clickable. In order to avoid that a margin of the
-        // filmstrip's size is added to the right.
-        //
-        // Pawel: after many attempts I failed to make notifications adjust to
-        // their contents width because of column and rows being used in the
-        // flex layout. The only option that seemed to limit the notification's
-        // size was explicit 'width' value which is not better than the margin
-        // added here.
-        if (this.props._filmstripVisible && !isNarrowAspectRatio(this)) {
-            notificationsStyle.marginRight = FILMSTRIP_SIZE;
-        }
-
-        return super.renderNotificationsContainer(
-            {
-                style: notificationsStyle
-            }
         );
     }
 
@@ -486,6 +404,15 @@ function _mapStateToProps(state) {
          * @type {boolean}
          */
         _pictureInPictureEnabled: getFeatureFlag(state, PIP_ENABLED),
+
+        
+        /**
+         * Whether Toolbox is enabled.
+         *
+         * @private
+         * @type {boolean}
+         */
+        _toolboxEnabled: getFeatureFlag(state, TOOLBOX_ENABLED, true),
 
         /**
          * The indicator which determines whether the UI is reduced (to

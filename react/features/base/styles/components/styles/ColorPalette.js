@@ -3,6 +3,7 @@
  */
 const BLACK = '#111111';
 
+const WHITE = '#FFFFFF';
 /**
  * The application's color palette.
  */

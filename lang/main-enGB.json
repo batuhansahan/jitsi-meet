@@ -60,7 +60,7 @@
         "fieldPlaceHolder": ""
     },
     "connectingOverlay": {
-        "joiningRoom": "Connecting you to your meeting…"
+        "joiningRoom": "Connecting you to your party..."
     },
     "connection": {
         "ATTACHED": "Attached",
