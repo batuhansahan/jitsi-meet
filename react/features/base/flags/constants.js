@@ -100,8 +100,8 @@ export const TOOLBOX_ALWAYS_VISIBLE = 'toolbox.alwaysVisible';
 export const WELCOME_PAGE_ENABLED = 'welcomepage.enabled';
 
 
-/**
- * Flag indicating if the welcome page should be enabled.
- * Default: disabled (false).
- */
-export const TOOLBOX_ENABLED = 'toolbox.enabled';
+// /**
+//  * Flag indicating if the welcome page should be enabled.
+//  * Default: disabled (false).
+//  */
+// export const TOOLBOX_ENABLED = 'toolbox.enabled';
