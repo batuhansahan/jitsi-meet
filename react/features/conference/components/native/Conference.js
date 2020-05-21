@@ -244,6 +244,7 @@ class Conference extends AbstractConference<Props, *> {
             _reducedUI,
             _shouldDisplayTileView,
             _toolboxVisible,
+            _toolboxEnabled
         } = this.props;
         const showGradient = _toolboxVisible;
         const applyGradientStretching = _filmstripVisible && isNarrowAspectRatio(this) && !_shouldDisplayTileView;
@@ -256,8 +257,7 @@ class Conference extends AbstractConference<Props, *> {
             <>
                 {/*
                   * The LargeVideo is the lowermost stacking layer.
-                  */
-                 getFeatureFlag(state, "toolbox.enabled") ? _shouldDisplayTileView
+                  */_toolboxEnabled ? _shouldDisplayTileView
                             ? <TileView onClick = { this._onClick } />
                             : <LargeVideo whiteback={false} onClick = { this._onClick } /> :
                   <LargeVideo whiteback={true} onClick = { this._onClick } /> 
@@ -267,7 +267,7 @@ class Conference extends AbstractConference<Props, *> {
                   * The activity/loading indicator goes above everything, except
                   * the toolbox/toolbars and the dialogs.
                   */
-                    getFeatureFlag(state, "toolbox.enabled") && _connecting
+                    _toolboxEnabled && _connecting
                         && <TintedView>
                             <LoadingIndicator />
                         </TintedView>
@@ -277,12 +277,12 @@ class Conference extends AbstractConference<Props, *> {
                     pointerEvents = 'box-none'
                     style = { styles.toolboxAndFilmstripContainer }>
 
-                    { _shouldDisplayTileView || getFeatureFlag(state, "toolbox.enabled") && <DisplayNameLabel participantId = { _largeVideoParticipantId } /> }
+                    { _shouldDisplayTileView || _toolboxEnabled && <DisplayNameLabel participantId = { _largeVideoParticipantId } /> }
 
                     {/*
                       * The Toolbox is in a stacking layer below the Filmstrip.
                       */}
-                    {getFeatureFlag(state, "toolbox.enabled") && <Toolbox />}
+                    {_toolboxEnabled && <Toolbox />}
 
                     {/*
                       * The Filmstrip is in a stacking layer above the
@@ -292,7 +292,7 @@ class Conference extends AbstractConference<Props, *> {
                       * React Components depict the videos of the conference's
                       * participants.
                       */
-                        _shouldDisplayTileView ? undefined : getFeatureFlag(state, "toolbox.enabled") && <Filmstrip />
+                        _shouldDisplayTileView ? undefined : _toolboxEnabled && <Filmstrip />
                     }
                 </SafeAreaView>
             </>
@@ -406,13 +406,13 @@ function _mapStateToProps(state) {
         _pictureInPictureEnabled: getFeatureFlag(state, PIP_ENABLED),
 
         
-        // /**
-        //  * Whether Toolbox is enabled.
-        //  *
-        //  * @private
-        //  * @type {boolean}
-        //  */
-        // _toolboxEnabled: getFeatureFlag(state, "toolbox.enabled"),
+        /**
+         * Whether Toolbox is enabled.
+         *
+         * @private
+         * @type {boolean}
+         */
+        _toolboxEnabled: getFeatureFlag(state, "toolbox.enabled"),
 
         /**
          * The indicator which determines whether the UI is reduced (to
