@@ -7,6 +7,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { appNavigate } from '../../../app';
 import { PIP_ENABLED, getFeatureFlag,TOOLBOX_ENABLED } from '../../../base/flags';
 import { Container, LoadingIndicator, TintedView } from '../../../base/react';
+import { getConferenceName } from '../../../base/conference';
 import { connect } from '../../../base/redux';
 import {
     isNarrowAspectRatio,
@@ -412,7 +413,8 @@ function _mapStateToProps(state) {
          * @private
          * @type {boolean}
          */
-        _toolboxEnabled: getFeatureFlag(state, "toolbox.enabled"),
+        _toolboxEnabled: getConferenceName(state) === 'toolbox_disabled' ? false : true,
+        // getFeatureFlag(state, "toolbox.enabled"),
 
         /**
          * The indicator which determines whether the UI is reduced (to
