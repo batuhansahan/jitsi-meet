@@ -34,7 +34,7 @@
             android:launchMode="singleTask"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
-            android:windowSoftInputMode="adjustNothing">
+            android:windowSoftInputMode="adjustResize">
         </activity>
         <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
 
