@@ -202,12 +202,15 @@ public abstract class BaseReactView<ListenerT>
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
 
-        // https://github.com/mockingbot/react-native-immersive#restore-immersive-state
-        RNImmersiveModule immersive = RNImmersiveModule.getInstance();
 
-        if (hasFocus && immersive != null) {
-            immersive.emitImmersiveStateChangeEvent();
-        }
+    /**
+        * https://github.com/mockingbot/react-native-immersive#restore-immersive-state
+        * RNImmersiveModule immersive = RNImmersiveModule.getInstance();
+        * 
+        * if (hasFocus && immersive != null) {
+        *   immersive.emitImmersiveStateChangeEvent();
+        * }
+     */
     }
 
     /**
