@@ -1,7 +1,7 @@
 // @flow
 
 import React, { PureComponent, type Node } from 'react';
-import { SafeAreaView, StatusBar, View } from 'react-native';
+import { SafeAreaView, View } from 'react-native';
 
 import { ColorSchemeRegistry } from '../../../color-scheme';
 import { connect } from '../../../redux';
@@ -51,10 +51,6 @@ class Header extends PureComponent<Props> {
 
         return (
             <View style = { _styles.headerOverlay }>
-                <StatusBar
-                    backgroundColor = { _styles.statusBar }
-                    barStyle = { this._getStatusBarContentColor() }
-                    translucent = { false } />
                 <SafeAreaView>
                     <View
                         style = { [
