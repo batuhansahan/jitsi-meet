@@ -4,15 +4,12 @@ import React from 'react';
 import { NativeModules, SafeAreaView } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
-import { appNavigate } from '../../../app';
-import { PIP_ENABLED, getFeatureFlag,TOOLBOX_ENABLED } from '../../../base/flags';
+import { appNavigate } from '../../../app/actions';
+import { PIP_ENABLED, getFeatureFlag } from '../../../base/flags';
 import { Container, LoadingIndicator, TintedView } from '../../../base/react';
 import { getConferenceName } from '../../../base/conference';
 import { connect } from '../../../base/redux';
-import {
-    isNarrowAspectRatio,
-    makeAspectRatioAware
-} from '../../../base/responsive-ui';
+import { ASPECT_RATIO_NARROW } from '../../../base/responsive-ui/constants';
 import { TestConnectionInfo } from '../../../base/testing';
 import { ConferenceNotification, isCalendarEnabled } from '../../../calendar-sync';
 import { DisplayNameLabel } from '../../../display-name';
@@ -25,8 +22,12 @@ import {
 } from '../../../filmstrip';
 import { AddPeopleDialog, CalleeInfoContainer } from '../../../invite';
 import { LargeVideo } from '../../../large-video';
+import { KnockingParticipantList } from '../../../lobby';
 import { BackButtonRegistry } from '../../../mobile/back-button';
-import { isToolboxVisible, setToolboxVisible, Toolbox } from '../../../toolbox';
+import { Captions } from '../../../subtitles';
+import { setToolboxVisible } from '../../../toolbox/actions';
+import { Toolbox } from '../../../toolbox/components/native';
+import { isToolboxVisible } from '../../../toolbox/functions';
 import {
     AbstractConference,
     abstractMapStateToProps
@@ -45,9 +46,12 @@ import styles, { NAVBAR_GRADIENT_COLORS } from './styles';
 type Props = AbstractProps & {
 
     /**
+     * Application's aspect ratio.
+     */
+    _aspectRatio: Symbol,
+
+    /**
      * Wherther the calendar feature is enabled or not.
-     *
-     * @private
      */
     _calendarEnabled: boolean,
 
@@ -56,15 +60,11 @@ type Props = AbstractProps & {
      * conference which includes establishing the XMPP connection and then
      * joining the room. If truthy, then an activity/loading indicator will be
      * rendered.
-     *
-     * @private
      */
     _connecting: boolean,
 
     /**
      * Set to {@code true} when the filmstrip is currently visible.
-     *
-     * @private
      */
     _filmstripVisible: boolean,
 
@@ -75,8 +75,6 @@ type Props = AbstractProps & {
 
     /**
      * Whether Picture-in-Picture is enabled.
-     *
-     * @private
      */
     _pictureInPictureEnabled: boolean,
 
@@ -91,26 +89,11 @@ type Props = AbstractProps & {
     /**
      * The indicator which determines whether the UI is reduced (to accommodate
      * smaller display areas).
-     *
-     * @private
      */
     _reducedUI: boolean,
 
     /**
-     * The handler which dispatches the (redux) action {@link setToolboxVisible}
-     * to show/hide the {@link Toolbox}.
-     *
-     * @param {boolean} visible - {@code true} to show the {@code Toolbox} or
-     * {@code false} to hide it.
-     * @private
-     * @returns {void}
-     */
-    _setToolboxVisible: Function,
-
-    /**
      * The indicator which determines whether the Toolbox is visible.
-     *
-     * @private
      */
     _toolboxVisible: boolean,
 
@@ -235,6 +218,7 @@ class Conference extends AbstractConference<Props, *> {
      */
     _renderContent() {
         const {
+            _aspectRatio,
             _connecting,
             _filmstripVisible,
             _largeVideoParticipantId,
@@ -244,7 +228,8 @@ class Conference extends AbstractConference<Props, *> {
             _toolboxEnabled
         } = this.props;
         const showGradient = _toolboxVisible;
-        const applyGradientStretching = _filmstripVisible && isNarrowAspectRatio(this) && !_shouldDisplayTileView;
+        const applyGradientStretching
+            = _filmstripVisible && _aspectRatio === ASPECT_RATIO_NARROW && !_shouldDisplayTileView;
 
         if (_reducedUI) {
             return this._renderContentForReducedUi();
@@ -346,9 +331,10 @@ function _mapStateToProps(state) {
     const {
         conference,
         joining,
+        membersOnly,
         leaving
     } = state['features/base/conference'];
-    const { reducedUI } = state['features/base/responsive-ui'];
+    const { aspectRatio, reducedUI } = state['features/base/responsive-ui'];
 
     // XXX There is a window of time between the successful establishment of the
     // XMPP connection and the subsequent commencement of joining the MUC during
@@ -360,46 +346,15 @@ function _mapStateToProps(state) {
     // - the XMPP connection is connected and we have no conference yet, nor we
     //   are leaving one.
     const connecting_
-        = connecting || (connection && (joining || (!conference && !leaving)));
+        = connecting || (connection && (!membersOnly && (joining || (!conference && !leaving))));
 
     return {
         ...abstractMapStateToProps(state),
-
-        /**
-         * Wherther the calendar feature is enabled or not.
-         *
-         * @private
-         * @type {boolean}
-         */
+        _aspectRatio: aspectRatio,
         _calendarEnabled: isCalendarEnabled(state),
-
-        /**
-         * The indicator which determines that we are still connecting to the
-         * conference which includes establishing the XMPP connection and then
-         * joining the room. If truthy, then an activity/loading indicator will
-         * be rendered.
-         *
-         * @private
-         * @type {boolean}
-         */
         _connecting: Boolean(connecting_),
-
-        /**
-         * Is {@code true} when the filmstrip is currently visible.
-         */
         _filmstripVisible: isFilmstripVisible(state),
-
-        /**
-         * The ID of the participant currently on stage.
-         */
         _largeVideoParticipantId: state['features/large-video'].participantId,
-
-        /**
-         * Whether Picture-in-Picture is enabled.
-         *
-         * @private
-         * @type {boolean}
-         */
         _pictureInPictureEnabled: getFeatureFlag(state, PIP_ENABLED),
 
         
@@ -420,15 +375,8 @@ function _mapStateToProps(state) {
          * @type {boolean}
          */
         _reducedUI: reducedUI,
-
-        /**
-         * The indicator which determines whether the Toolbox is visible.
-         *
-         * @private
-         * @type {boolean}
-         */
         _toolboxVisible: isToolboxVisible(state)
     };
 }
 
-export default connect(_mapStateToProps)(makeAspectRatioAware(Conference));
+export default connect(_mapStateToProps)(Conference);
